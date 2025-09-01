@@ -1,0 +1,71 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  passwordHash  String
+  role          Role     @default(USER)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  farms         Farm[]
+}
+
+model Farm {
+  id        String   @id @default(cuid())
+  name      String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  fields    Field[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Field {
+  id        String   @id @default(cuid())
+  name      String
+  crop      String
+  areaHa    Float
+  location  String?
+  farm      Farm     @relation(fields: [farmId], references: [id])
+  farmId    String
+  records   Record[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Record {
+  id        String   @id @default(cuid())
+  date      DateTime
+  type      RecordType
+  product   String?
+  dose      Float?
+  units     String?
+  notes     String?
+  field     Field    @relation(fields: [fieldId], references: [id])
+  fieldId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RecordType {
+  SIEMBRA
+  FERTILIZACION
+  RIEGO
+  TRATAMIENTO
+  COSECHA
+  OTRO
+}
